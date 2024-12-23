@@ -78,7 +78,7 @@ void CreateZipArchive(const std::vector<std::string>& images) {
 }
 
 // Функция для загрузки ZIP-архива по POST
-void postZipArchive(const std::string& zipFileName) {
+bool postZipArchive(const std::string& zipFileName) {
     CURL* curl;
     CURLcode res;
     FILE* hd_src;
