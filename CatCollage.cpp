@@ -7,6 +7,7 @@
 #include <thread>
 #include <chrono>
 #include <zip.h>
+#include <filesystem>
 
 const std::string URL = "http://algisothal.ru:8888/cat";
 const int NUM_CATS = 12;
