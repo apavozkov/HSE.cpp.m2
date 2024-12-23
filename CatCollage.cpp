@@ -10,6 +10,7 @@
 #include <sys/stat.h>
 
 const std::string URL = "http://algisothal.ru:8888/cat";
+const std::string UPLOAD_URL = "http://<address>:<port>/cat"; // Замените на реальный адрес
 const int NUM_CATS = 12;
 
 // Функция для обработки получения изображения
@@ -37,7 +38,6 @@ bool DownloadCatImage(const std::string& filename) {
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &outFile);
         res = curl_easy_perform(curl);
-
         curl_easy_cleanup(curl);
     }
 
@@ -77,6 +77,45 @@ void CreateZipArchive(const std::vector<std::string>& images) {
     zip_close(zip);
 }
 
+// Функция для загрузки ZIP-архива по POST
+bool UploadZipArchive(const std::string& zipFilename) {
+    CURL* curl;
+    CURLcode res;
+    struct stat file_info;
+    curl_mime* mime;
+    curl_mimepart* part;
+
+    // Получить информацию о файле
+    if(stat(zipFilename.c_str(), &file_info)) {
+        std::cerr << "Не удалось получить информацию о файле: " << zipFilename << std::endl;
+        return false;
+    }
+
+    curl_global_init(CURL_GLOBAL_DEFAULT);
+    curl = curl_easy_init();
+    if(curl) {
+        mime = curl_mime_init(curl);
+        part = curl_mime_addpart(mime);
+        curl_mime_name(part, "file"); // Имя поля
+        curl_mime_filedata(part, zipFilename.c_str()); // Имя файла
+        curl_mime_type(part, "application/zip"); // Тип контента
+
+        curl_easy_setopt(curl, CURLOPT_URL, UPLOAD_URL.c_str());
+        curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime);
+        res = curl_easy_perform(curl);
+        
+        if(res != CURLE_OK) {
+            std::cerr << "Ошибка загрузки архива: " << curl_easy_strerror(res) << std::endl;
+        }
+
+        curl_mime_free(mime);
+        curl_easy_cleanup(curl);
+    }
+
+    curl_global_cleanup();
+    return true;
+}
+
 // Основная функция сервиса
 int main() {
     std::vector<std::string> catImages;
@@ -98,6 +137,13 @@ int main() {
 
     CreateZipArchive(catImages);
     std::cout << "Создан ZIP-архив с котиками." << std::endl;
+
+    // Загружаем ZIP-архив
+    if (UploadZipArchive("cats.zip")) {
+        std::cout << "Архив успешно загружен!" << std::endl;
+    } else {
+        std::cout << "Ошибка при загрузке архива." << std::endl;
+    }
 
     return 0;
 }
