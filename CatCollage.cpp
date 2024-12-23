@@ -78,40 +78,30 @@ void CreateZipArchive(const std::vector<std::string>& images) {
 }
 
 // Функция для загрузки ZIP-архива по POST
-bool UploadZipArchive(const std::string& zipFilename) {
+void postZipArchive(const std::string& zipFileName) {
     CURL* curl;
     CURLcode res;
+    FILE* hd_src;
     struct stat file_info;
-    curl_mime* mime;
-    curl_mimepart* part;
 
-    // Получить информацию о файле
-    if(stat(zipFilename.c_str(), &file_info)) {
-        std::cerr << "Не удалось получить информацию о файле: " << zipFilename << std::endl;
-        return false;
-    }
-
+    stat(zipFileName.c_str(), &file_info);
+    hd_src = fopen(zipFileName.c_str(), "rb");
+    
     curl_global_init(CURL_GLOBAL_DEFAULT);
     curl = curl_easy_init();
     if(curl) {
-        mime = curl_mime_init(curl);
-        part = curl_mime_addpart(mime);
-        curl_mime_name(part, "file"); // Имя поля
-        curl_mime_filedata(part, zipFilename.c_str()); // Имя файла
-        curl_mime_type(part, "application/zip"); // Тип контента
-
         curl_easy_setopt(curl, CURLOPT_URL, UPLOAD_URL.c_str());
-        curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime);
-        res = curl_easy_perform(curl);
+        curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+        curl_easy_setopt(curl, CURLOPT_READDATA, hd_src);
+        curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)file_info.st_size);
         
+        res = curl_easy_perform(curl);
         if(res != CURLE_OK) {
-            std::cerr << "Ошибка загрузки архива: " << curl_easy_strerror(res) << std::endl;
+            std::cerr << "Ошибка при отправке архива: " << curl_easy_strerror(res) << std::endl;
         }
-
-        curl_mime_free(mime);
+        fclose(hd_src);
         curl_easy_cleanup(curl);
     }
-
     curl_global_cleanup();
     return true;
 }
@@ -140,7 +130,7 @@ int main() {
     std::cout << "Создан ZIP-архив с котиками." << std::endl;
 
     // Загружаем ZIP-архив
-    if (UploadZipArchive("cats.zip")) {
+    if (postZipArchive("cats.zip")) {
         std::cout << "Архив успешно загружен!" << std::endl;
     } else {
         std::cout << "Ошибка при загрузке архива." << std::endl;
