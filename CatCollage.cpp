@@ -44,9 +44,16 @@ bool DownloadCatImage(const std::string& filename) {
     return true;
 }
 
+// Функция для получения размера файла
+std::uintmax_t GetFileSize(const std::string& filename) {
+    return std::filesystem::file_size(filename);
+}
+
 // Функция для проверки на уникальность изображений
-bool IsUniqueImage(const std::set<std::string>& imageSet, const std::string& filename) {
-    return imageSet.find(filename) == imageSet.end();
+bool IsUniqueImage(std::set<std::pair<std::string, std::uintmax_t>>& imageSet, const std::string& filename) {
+    std::uintmax_t size = GetFileSize(filename);
+    auto imagePair = std::make_pair(filename, size);
+    return imageSet.insert(imagePair).second; // Возвращает true только если вставлено новое значение
 }
 
 // Функция для создания ZIP-архива
@@ -71,7 +78,9 @@ void CreateZipArchive(const std::vector<std::string>& images) {
 // Основная функция сервиса
 int main() {
     std::vector<std::string> catImages;
-    std::set<std::string> uniqueImages;
+  //  std::set<std::string> uniqueImages;
+    std::set<std::pair<std::string, std::uintmax_t>> imageSet;
+    const std::string baseFilename = "cat";
 
     while (catImages.size() < NUM_CATS) {
         // Задержка от 1 до 15 секунд
@@ -79,12 +88,13 @@ int main() {
         std::this_thread::sleep_for(std::chrono::seconds(delay));
 
         std::string filename = "cat_" + std::to_string(catImages.size()) + ".jpeg";
-        if (DownloadCatImage(filename) && IsUniqueImage(uniqueImages, filename)) {
-            catImages.push_back(filename);
-            uniqueImages.insert(filename);
+        if (IsUniqueImage(imageSet, filename)) {
+            DownloadCatImage(filename);
         } else {
-            std::cout << "Не удалось получить уникальное изображение." << std::endl;
+            std::cout << "Image " << filename << " is already loaded." << std::endl;
         }
+        
+        std::this_thread::sleep_for(std::chrono::seconds(5)); // Задержка между загрузками
     }
 
     CreateZipArchive(catImages);
