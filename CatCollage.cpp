@@ -10,7 +10,7 @@
 #include <sys/stat.h>
 
 const std::string URL = "http://algisothal.ru:8888/cat";
-const std::string UPLOAD_URL = "http://<address>:<port>/cat"; // Замените на реальный адрес
+const std::string UPLOAD_URL = "http://algisothal.ru:8888/cat";
 const int NUM_CATS = 12;
 
 // Функция для обработки получения изображения
@@ -130,6 +130,7 @@ int main() {
         if (DownloadCatImage(filename) && IsUniqueImage(uniqueImageSizes, filename)) {
             catImages.push_back(filename);
             uniqueImageSizes.insert(GetFileSize(filename));
+            std::cout << "Получено уникальное изображение." << std::endl;
         } else {
             std::cout << "Не удалось получить уникальное изображение." << std::endl;
         }
