@@ -91,7 +91,7 @@ bool postZipArchive(const std::string& zipFileName) {
     curl = curl_easy_init();
     if(curl) {
         curl_easy_setopt(curl, CURLOPT_URL, UPLOAD_URL.c_str());
-        curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+        curl_easy_setopt(curl, CURLOPT_HTTPPOST, 1L);
         curl_easy_setopt(curl, CURLOPT_READDATA, hd_src);
         curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)file_info.st_size);
         
