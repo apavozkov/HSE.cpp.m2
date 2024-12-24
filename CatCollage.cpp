@@ -10,7 +10,7 @@
 #include <sys/stat.h>
 
 const std::string URL = "http://algisothal.ru:8888/cat";
-const std::string UPLOAD_URL = "http://algisothal.ru:8888/cat";
+const std::string UPLOAD_URL = "http://algisothal.ru:8890/cat";
 const int NUM_CATS = 12;
 
 // Функция для обработки получения изображения
