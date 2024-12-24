@@ -131,7 +131,7 @@ bool postZipArchive(const std::string& zipFileName) {
 
 // Основная функция
 int main() {
-    std::vector<std::string> catImages; // Вектор изображений
+    std::vector<std::string> catImages; // Массив изображений
     std::set<long> uniqueImageSizes; // Вектор с уникальными размерами
 
     while (catImages.size() < NUM_CATS) { // Перебираем в цикле, пока не получим нужное количество котеек
