@@ -98,9 +98,6 @@ void LoadCatImages(std::vector<std::string>& catImages, std::set<long>& uniqueIm
             }
         }
         threads.clear(); // Очищаем список потоков
-
-        int delay = rand() % 15 + 1;
-        std::this_thread::sleep_for(std::chrono::seconds(delay));
     }
     
     for (auto& thread : threads) { // Ожидаем завершения всех потоков, которые могли остаться
@@ -188,6 +185,8 @@ int main() {
 
     LoadCatImages(catImages, uniqueImageSizes);
 
+    std::lock_guard<std::mutex> guard(mutex);
+    
     if (CreateZipArchive(catImages)) {
         std::cout << "Создан ZIP-архив с котиками." << std::endl;
     } else {
