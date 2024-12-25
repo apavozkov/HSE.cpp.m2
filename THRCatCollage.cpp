@@ -88,7 +88,7 @@ void LoadCatImages(std::vector<std::string>& catImages, std::set<long>& uniqueIm
     std::vector<std::thread> threads;
 
     while (catImages.size() < NUM_CATS) {
-        if (threads.size() < MAX_THREADS) {
+        while (threads.size() < MAX_THREADS) {
             threads.emplace_back(DownloadCatImage, catImages.size(), std::ref(catImages), std::ref(uniqueImageSizes)); // Запускаем новый поток загрузки
         }
 
