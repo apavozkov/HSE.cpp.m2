@@ -10,7 +10,7 @@
 
 // Константы
 const std::string URL = "http://algisothal.ru:8888/cat"; // Адрес для get
-const std::string UPLOAD_URL = "http://algisothal.ru:8890/cat"; // Адрес для post
+const std::string UPLOAD_URL = "http://algisothal.ru:8888/cat"; // Адрес для post
 const int NUM_CATS = 12; // Количество котиков в наборе
 
 // Функция для обработки получения изображения
