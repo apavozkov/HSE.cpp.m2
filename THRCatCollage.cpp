@@ -96,7 +96,7 @@ void LoadCatImages(std::vector<std::string>& catImages, std::set<long>& uniqueIm
         while (catImages.size() < NUM_CATS) {
             threads.emplace_back(DownloadCatImage, catImages.size(), std::ref(catImages), std::ref(uniqueImageSizes), std::ref(loadedCount));
             std::cout << "Поток создан" << std::endl;
-            std::this_thread::sleep_for(std::chrono::seconds(3));
+            std::this_thread::sleep_for(std::chrono::seconds(1));
         }
 
         for (auto& thread : threads) {
